@@ -28,10 +28,45 @@ const ChatContainer = () => {
   }, [selectedUser._id, getMessages, subscribeToMessages, unsubscribeFromMessages]);
 
   useEffect(() => {
-    if (messageEndRef.current && messages) {
+    if (messageEndRef.current && messages?.length > 0) {
       messageEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
+
+  const renderFileAttachment = (file) => {
+    // Check if we have the complete file object structure
+    if (!file || typeof file !== 'object') return null;
+    
+    // Handle image files
+    if (file.url && (file.type?.startsWith('image/') || file.url.match(/\.(jpeg|jpg|gif|png)$/i))) {
+      return (
+        <img
+          src={file.url}
+          alt="Attachment"
+          className="sm:max-w-[200px] rounded-md mb-2"
+        />
+      );
+    }
+    
+    // For any other file type, display a file link
+    if (file.url) {
+      return (
+        <a 
+          href={file.url} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 p-2 rounded-md mb-2"
+        >
+          <span>📄</span>
+          <span className="text-sm underline">
+            {file.name || "Download attachment"}
+          </span>
+        </a>
+      );
+    }
+    
+    return null;
+  };
 
   if (isMessagesLoading) {
     return (
@@ -48,13 +83,13 @@ const ChatContainer = () => {
       <ChatHeader />
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((message) => (
+        {messages.map((message, index) => (
           <div
             key={message._id}
             className={`chat ${message.senderId === authUser._id ? "chat-end" : "chat-start"}`}
-            ref={messageEndRef}
+            ref={index === messages.length - 1 ? messageEndRef : null}
           >
-            <div className=" chat-image avatar">
+            <div className="chat-image avatar">
               <div className="size-10 rounded-full border">
                 <img
                   src={
@@ -71,14 +106,9 @@ const ChatContainer = () => {
                 {formatMessageTime(message.createdAt)}
               </time>
             </div>
-            <div className="chat-bubble flex flex-col bg-">
-              {message.image && (
-                <img
-                  src={message.image}
-                  alt="Attachment"
-                  className="sm:max-w-[200px] rounded-md mb-2"
-                />
-              )}
+            <div className={`${message.file?"bg-neutral/40 chat-bubble flex flex-col":"chat-bubble flex flex-col"}`}>
+              {/* Check for both file and image fields for backward compatibility */}
+              {message.file && renderFileAttachment(message.file)}
               {message.text && <p>{message.text}</p>}
             </div>
           </div>
@@ -89,4 +119,5 @@ const ChatContainer = () => {
     </div>
   );
 };
+
 export default ChatContainer;
