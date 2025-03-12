@@ -1,63 +1,138 @@
 import { useRef, useState } from "react";
 import { useChatStore } from "../store/useChatStore";
-import { Image, Send, X } from "lucide-react";
-import toast from "react-hot-toast";
+import { Send, X, Paperclip } from "lucide-react";
+// import toast from "react-hot-toast";
 
 const MessageInput = () => {
   const [text, setText] = useState("");
-  const [imagePreview, setImagePreview] = useState(null);
+  const [filePreview, setFilePreview] = useState(null);
+  const [fileData, setFileData] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
   const fileInputRef = useRef(null);
   const { sendMessage } = useChatStore();
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file");
-      return;
-    }
+  // Your Cloudinary configuration
+  const CLOUD_NAME = "dwlgibweu"; // Replace with your actual cloud name
+  const UPLOAD_PRESET = "chat_app"; // Replace with your actual upload preset
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Reset any previous error
+    setUploadError(null);
+
+    // Create file preview
     const reader = new FileReader();
     reader.onloadend = () => {
-      setImagePreview(reader.result);
+      setFilePreview(reader.result);
+      setFileData(file); // Store the actual file object
     };
     reader.readAsDataURL(file);
   };
 
-  const removeImage = () => {
-    setImagePreview(null);
+  const removeFile = () => {
+    setFilePreview(null);
+    setFileData(null);
+    setUploadError(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const uploadToCloudinary = async (file) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", UPLOAD_PRESET);
+      
+      console.log("Starting file upload to Cloudinary...");
+      console.log("File type:", file.type);
+      console.log("File size:", file.size, "bytes");
+      
+      const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`, {
+        method: "POST",
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Cloudinary error response:", errorText);
+        throw new Error(`Upload failed with status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log("Upload successful:", data);
+      return data.secure_url;
+    } catch (error) {
+      console.error("File upload error:", error);
+      throw error;
+    }
   };
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!text.trim() && !imagePreview) return;
-
+    if (!text.trim() && !fileData) return;
+    
+    setUploadError(null);
+    setIsUploading(fileData ? true : false);
+    
     try {
+      let fileUrl = null;
+      
+      // Upload file to Cloudinary if there's a file
+      if (fileData) {
+        try {
+          fileUrl = await uploadToCloudinary(fileData);
+        } catch (error) {
+          setUploadError("Failed to upload file. Please try again.", error);
+          setIsUploading(false);
+          return;
+        }
+      }
+
+      // Send message with file if uploaded
       await sendMessage({
         text: text.trim(),
-        image: imagePreview,
+        file: fileUrl ? {
+          url: fileUrl,
+          type: fileData.type,
+          name: fileData.name
+        } : null,
       });
 
       setText("");
-      setImagePreview(null);
+      setFilePreview(null);
+      setFileData(null);
+      setUploadError(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (error) {
       console.error("Failed to send message:", error);
+      setUploadError("Failed to send message. Please try again.");
+      // You can uncomment and use toast here
+      // toast.error("Failed to send message");
+    } finally {
+      setIsUploading(false);
     }
   };
 
   return (
     <div className="p-4 w-full">
-      {imagePreview && (
+      {filePreview && (
         <div className="mb-3 flex items-center gap-2">
           <div className="relative">
-            <img
-              src={imagePreview}
-              alt="Preview"
-              className="w-20 h-20 object-cover rounded-lg border border-zinc-700"
-            />
+            {fileData && fileData.type && fileData.type.startsWith("image/") ? (
+              <img
+                src={filePreview}
+                alt="Preview"
+                className="w-20 h-20 object-cover rounded-lg border border-zinc-700"
+              />
+            ) : (
+              <div className="p-3 border border-zinc-700 rounded-lg bg-zinc-800 text-zinc-200">
+                📄 {fileData ? fileData.name : "File"}
+              </div>
+            )}
             <button
-              onClick={removeImage}
+              onClick={removeFile}
               className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-base-300
               flex items-center justify-center"
               type="button"
@@ -65,6 +140,12 @@ const MessageInput = () => {
               <X className="size-3" />
             </button>
           </div>
+        </div>
+      )}
+
+      {uploadError && (
+        <div className="mb-3 text-red-500 text-sm">
+          {uploadError}
         </div>
       )}
 
@@ -79,30 +160,35 @@ const MessageInput = () => {
           />
           <input
             type="file"
-            accept="image/*"
             className="hidden"
             ref={fileInputRef}
-            onChange={handleImageChange}
+            onChange={handleFileChange}
+            accept="*/*" // Accept all file types
           />
 
           <button
             type="button"
-            className={`hidden sm:flex btn btn-circle
-                     ${imagePreview ? "text-emerald-500" : "text-zinc-400"}`}
+            className={`hidden sm:flex btn btn-circle text-zinc-400`}
             onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
           >
-            <Image size={20} />
+            <Paperclip size={20} />
           </button>
         </div>
         <button
           type="submit"
           className="btn btn-sm btn-circle"
-          disabled={!text.trim() && !imagePreview}
+          disabled={(!text.trim() && !fileData) || isUploading}
         >
-          <Send size={22} />
+          {isUploading ? (
+            <span className="loading loading-spinner loading-xs"></span>
+          ) : (
+            <Send size={22} />
+          )}
         </button>
       </form>
     </div>
   );
 };
+
 export default MessageInput;

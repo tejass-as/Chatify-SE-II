@@ -37,25 +37,51 @@ export const getMessages = async (req, res) => {
 
 export const sendMessage = async (req, res) => {
   try {
-    const { text, image } = req.body;
+    const { text, file } = req.body;
     const { id: receiverId } = req.params;
     const senderId = req.user._id;
 
-    let imageUrl;
-    if (image) {
-      const uploadResponse = await cloudinary.uploader.upload(image);
-      imageUrl = uploadResponse.secure_url;
+    // Handle both image and file for backward compatibility
+    const { image } = req.body;
+    
+    let fileData = null;
+    
+    // Process file upload if file is provided
+    if (file && file.url) {
+      // If we already have a URL (client-side upload to Cloudinary)
+      fileData = {
+        url: file.url,
+        type: file.type || '',
+        name: file.name || 'Attachment'
+      };
+    } 
+    // For backward compatibility - handle direct image uploads
+    else if (image) {
+      try {
+        const uploadResponse = await cloudinary.uploader.upload(image);
+        fileData = {
+          url: uploadResponse.secure_url,
+          type: 'image',
+          name: 'Image'
+        };
+      } catch (error) {
+        console.error("Error uploading to Cloudinary:", error);
+        return res.status(500).json({ error: "Failed to upload file" });
+      }
     }
 
+    // Create and save the new message
     const newMessage = new Message({
       senderId,
       receiverId,
       text,
-      image: imageUrl,
+      file: fileData,            // New file structure
+      image: fileData?.url       // For backward compatibility
     });
 
     await newMessage.save();
 
+    // Notify the receiver through socket.io if they're online
     const receiverSocketId = getReceiverSocketId(receiverId);
     if (receiverSocketId) {
       io.to(receiverSocketId).emit("newMessage", newMessage);
