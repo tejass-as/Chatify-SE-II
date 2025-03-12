@@ -15,9 +15,23 @@ const messageSchema = new mongoose.Schema(
     text: {
       type: String,
     },
+    // Keep image field for backward compatibility
     image: {
       type: String,
+      default: "",
     },
+    // Add new file field structure
+    file: {
+      url: {
+        type: String,
+      },
+      type: {
+        type: String,
+      },
+      name: {
+        type: String,
+      }
+    }
   },
   { timestamps: true }
 );
