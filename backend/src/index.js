@@ -5,6 +5,7 @@ import cors from "cors"
 
 import authRoutes from "./routes/auth.route.js"
 import messageRoutes from "./routes/message.route.js"
+import groupMessagesRoutes from "./routes/groupMessage.route.js"
 import { connectDB } from "./lib/db.js"
 import {app, server} from "./lib/socket.js"
 
@@ -21,6 +22,7 @@ app.use(cors({
 
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/groupMessages", groupMessagesRoutes);
 
 server.listen(PORT, () => {
     console.log(`server is listening on port ${PORT}`);
