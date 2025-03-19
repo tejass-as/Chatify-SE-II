@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { Send, X, Paperclip } from "lucide-react";
-// import toast from "react-hot-toast";
+import toast from "react-hot-toast";
 
 const MessageInput = () => {
   const [text, setText] = useState("");
@@ -10,24 +10,27 @@ const MessageInput = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState(null);
   const fileInputRef = useRef(null);
-  const { sendMessage } = useChatStore();
 
-  // Your Cloudinary configuration
-  const CLOUD_NAME = "dwlgibweu"; // Replace with your actual cloud name
-  const UPLOAD_PRESET = "chat_app"; // Replace with your actual upload preset
+  const {
+    sendMessage, 
+    sendGroupMessage, 
+    isShowingGroups 
+  } = useChatStore();
+
+  // Cloudinary configuration
+  const CLOUD_NAME = "dwlgibweu"; 
+  const UPLOAD_PRESET = "chat_app"; 
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Reset any previous error
     setUploadError(null);
 
-    // Create file preview
     const reader = new FileReader();
     reader.onloadend = () => {
       setFilePreview(reader.result);
-      setFileData(file); // Store the actual file object
+      setFileData(file);
     };
     reader.readAsDataURL(file);
   };
@@ -44,22 +47,20 @@ const MessageInput = () => {
       const formData = new FormData();
       formData.append("file", file);
       formData.append("upload_preset", UPLOAD_PRESET);
-      
-      console.log("Starting file upload to Cloudinary...");
-      console.log("File type:", file.type);
-      console.log("File size:", file.size, "bytes");
+
+      console.log("Uploading file to Cloudinary...");
       
       const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`, {
         method: "POST",
         body: formData,
       });
-      
+
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("Cloudinary error response:", errorText);
+        console.error("Cloudinary error:", errorText);
         throw new Error(`Upload failed with status: ${response.status}`);
       }
-      
+
       const data = await response.json();
       console.log("Upload successful:", data);
       return data.secure_url;
@@ -72,44 +73,41 @@ const MessageInput = () => {
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!text.trim() && !fileData) return;
-    
+
     setUploadError(null);
     setIsUploading(fileData ? true : false);
-    
+
     try {
       let fileUrl = null;
-      
-      // Upload file to Cloudinary if there's a file
+
       if (fileData) {
         try {
           fileUrl = await uploadToCloudinary(fileData);
         } catch (error) {
-          setUploadError("Failed to upload file. Please try again.", error);
+          console.log(error);
+          setUploadError("Failed to upload file. Please try again.");
           setIsUploading(false);
           return;
         }
       }
 
-      // Send message with file if uploaded
-      await sendMessage({
-        text: text.trim(),
-        file: fileUrl ? {
-          url: fileUrl,
-          type: fileData.type,
-          name: fileData.name
-        } : null,
-      });
+      if (isShowingGroups) {
+        await sendGroupMessage({
+          text: text.trim(),
+          file: fileUrl ? { url: fileUrl, type: fileData?.type, name: fileData?.name } : null,
+        });
+      } else {
+        await sendMessage({
+          text: text.trim(),
+          file: fileUrl ? { url: fileUrl, type: fileData?.type, name: fileData?.name } : null,
+        });
+      }
 
       setText("");
-      setFilePreview(null);
-      setFileData(null);
-      setUploadError(null);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      removeFile();
     } catch (error) {
       console.error("Failed to send message:", error);
-      setUploadError("Failed to send message. Please try again.");
-      // You can uncomment and use toast here
-      // toast.error("Failed to send message");
+      toast.error("Failed to send message.");
     } finally {
       setIsUploading(false);
     }
@@ -120,7 +118,7 @@ const MessageInput = () => {
       {filePreview && (
         <div className="mb-3 flex items-center gap-2">
           <div className="relative">
-            {fileData && fileData.type && fileData.type.startsWith("image/") ? (
+            {fileData?.type?.startsWith("image/") ? (
               <img
                 src={filePreview}
                 alt="Preview"
@@ -128,13 +126,12 @@ const MessageInput = () => {
               />
             ) : (
               <div className="p-3 border border-zinc-700 rounded-lg bg-zinc-800 text-zinc-200">
-                📄 {fileData ? fileData.name : "File"}
+                📄 {fileData?.name || "File"}
               </div>
             )}
             <button
               onClick={removeFile}
-              className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-base-300
-              flex items-center justify-center"
+              className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-base-300 flex items-center justify-center"
               type="button"
             >
               <X className="size-3" />
@@ -143,11 +140,7 @@ const MessageInput = () => {
         </div>
       )}
 
-      {uploadError && (
-        <div className="mb-3 text-red-500 text-sm">
-          {uploadError}
-        </div>
-      )}
+      {uploadError && <div className="mb-3 text-red-500 text-sm">{uploadError}</div>}
 
       <form onSubmit={handleSendMessage} className="flex items-center gap-2">
         <div className="flex-1 flex gap-2">
@@ -163,12 +156,11 @@ const MessageInput = () => {
             className="hidden"
             ref={fileInputRef}
             onChange={handleFileChange}
-            accept="*/*" // Accept all file types
+            accept="*/*"
           />
-
           <button
             type="button"
-            className={`hidden sm:flex btn btn-circle text-zinc-400`}
+            className="flex btn btn-circle text-zinc-400"
             onClick={() => fileInputRef.current?.click()}
             disabled={isUploading}
           >
