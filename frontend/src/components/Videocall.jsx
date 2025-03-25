@@ -23,11 +23,11 @@ const VideoCallModal = () => {
   // Update video streams
   useEffect(() => {
     if (localVideoRef.current && localStream) {
-      localVideoRef.current.srcObject = localStream;
+      localVideoRef.current.srcObject = remoteStream;
       console.log("localstream",localStream)
     }
     if (remoteVideoRef.current && remoteStream) {
-        remoteVideoRef.current.srcObject = localStream;
+        remoteVideoRef.current.srcObject = remoteStream;
         console.log("remotestream",remoteStream)
     }
   }, [localStream, remoteStream]);
