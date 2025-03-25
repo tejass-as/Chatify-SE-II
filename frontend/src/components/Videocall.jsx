@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useVideoCallStore } from '../store/useVideoCallStore';
 import { Phone, PhoneOff, Mic, MicOff, Video, VideoOff } from 'lucide-react';
 
@@ -19,6 +19,7 @@ const VideoCallModal = () => {
 
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
+  const [temp, setTemp] = useState(true);
 
   // Update video streams
   useEffect(() => {
@@ -30,7 +31,7 @@ const VideoCallModal = () => {
         remoteVideoRef.current.srcObject = remoteStream;
         console.log("remotestream",remoteStream)
     }
-  }, [localStream, remoteStream, toggleVideo]);
+  }, [localStream, remoteStream, temp]);
 
   // Incoming call UI
   if (incomingCall) {
@@ -82,13 +83,19 @@ const VideoCallModal = () => {
           {/* Call Controls */}
           <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-4">
             <button 
-              onClick={toggleMicrophone}
+              onClick={() => { 
+                toggleMicrophone();
+                setTemp(!temp); // Toggle temp state
+              }}
               className={`p-3 rounded-full ${isMicMuted ? 'bg-red-500' : 'bg-gray-700'} text-white`}
             >
               {isMicMuted ? <MicOff /> : <Mic />}
             </button>
             <button 
-              onClick={toggleVideo}
+              onClick={() => { 
+                toggleVideo();
+                setTemp(!temp); // Toggle temp state
+              }}
               className={`p-3 rounded-full ${isVideoMuted ? 'bg-red-500' : 'bg-gray-700'} text-white`}
             >
               {isVideoMuted ? <VideoOff /> : <Video />}
