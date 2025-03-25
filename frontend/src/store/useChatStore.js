@@ -77,7 +77,12 @@ export const useChatStore = create((set, get) => ({
   },
 
   // Set selected user
-  setSelectedUser: (selectedUser) => set({ selectedUser }),
+  setSelectedUser: async (selectedUser) => {
+    set({ selectedUser });  
+    const initializeSocket = useAuthStore.getState().initializeSocket;
+    const authUser = useAuthStore.getState().authUser;
+    initializeSocket(authUser._id);
+},
 
   // Fetch Groups
   getGroups: async () => {

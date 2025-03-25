@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { axiosInstance } from "../lib/axios.js";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
+import { useVideoCallStore } from "./useVideoCallStore.js";
 
 const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:5001" : "/";
 
@@ -13,6 +14,67 @@ export const useAuthStore = create((set, get) => ({
   isCheckingAuth: true,
   onlineUsers: [],
   socket: null,
+
+  initializeSocket: (userId ) => {
+    console.log("🔍 Attempting to connect with userId:", userId); // Debug log
+
+    if (!userId) {
+        console.warn("❌ userId is undefined! Not connecting to socket.");
+        return null;
+    }
+
+    const socket = io('http://localhost:5001', {
+      query: { userId }
+    });
+
+    console.log("hi")
+
+    // Set socket in video call store
+    useVideoCallStore.getState().setSocket(socket);
+
+    // Setup socket listeners
+    socket.on('connect', () => {
+      console.log('Socket connected');
+    });
+
+    socket.on('connect_error', (error) => {
+      console.error("Connection error:", error);
+    });   
+
+    socket.on('disconnect', () => {
+      console.log('Socket disconnected');
+    });
+
+    // Listen for online users
+    socket.on('getOnlineUsers', (users) => {
+      set({ onlineUsers: users });
+    });
+
+    // Video call event listeners
+    socket.on('incoming-call', (callData) => {
+      useVideoCallStore.getState().handleIncomingCall(callData);
+    });
+
+    socket.on('call-answer', (answerData) => {
+      useVideoCallStore.getState().handleCallAnswer(answerData);
+    });
+
+    socket.on('ice-candidate', (candidateData) => {
+      useVideoCallStore.getState().handleIceCandidate(candidateData);
+    });
+
+    socket.on('end-call', () => {
+      useVideoCallStore.getState().endCall();
+    });
+
+    socket.on('call-rejected', () => {
+      toast.error('Call was rejected');
+      useVideoCallStore.getState().endCall();
+    });
+
+    set({ socket });
+    return socket;
+  },
 
   checkAuth: async () => {
     try {
