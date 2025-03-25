@@ -23,11 +23,11 @@ export const useAuthStore = create((set, get) => ({
         return null;
     }
 
-    const socket = io('http://localhost:5001', {
+    const socket = io(BASE_URL, {
       query: { userId }
     });
 
-    console.log("hi")
+    // console.log("hi")
 
     // Set socket in video call store
     useVideoCallStore.getState().setSocket(socket);

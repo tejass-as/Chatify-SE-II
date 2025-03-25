@@ -17,7 +17,7 @@ let transporter;
 // Initialize email transporter (async function to be called when app starts)
 export const initializeEmailService = async () => {
     // For development/testing, use Ethereal
-    if (process.env.NODE_ENV === "production") {
+    if (process.env.NODE_ENV !== "production") {
         const testAccount = await nodemailer.createTestAccount();
         transporter = nodemailer.createTransport({
             host: "smtp.ethereal.email",
