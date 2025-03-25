@@ -86,7 +86,7 @@ io.on("connection", (socket) => {
         answer: data.answer
       });
       
-      console.log(`Call answered by ${userId} for ${data.to}`);
+    //   console.log(`Call answered by ${userId} for ${data.to} with answer: ${data.answer}`);
     } catch (error) {
       console.error('Error in call-answer:', error);
       socket.emit('call-error', { message: error.message });

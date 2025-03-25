@@ -48,7 +48,10 @@ export const useVideoCallStore = create((set, get) => {
 
       // Handle remote stream
       peerConnection.ontrack = (event) => {
+        console.log("Received remote track:", event.track);
+        console.log("Full remote stream:", event.streams[0]);
         set({ remoteStream: event.streams[0] });
+        // console.log("getting remote stream", get().remoteStream); working
       };
 
       // Get local media stream
@@ -57,7 +60,7 @@ export const useVideoCallStore = create((set, get) => {
           video: true, 
           audio: true 
         });
-        
+
         // Add local stream tracks to peer connection
         localStream.getTracks().forEach(track => {
           peerConnection.addTrack(track, localStream);
@@ -140,6 +143,7 @@ export const useVideoCallStore = create((set, get) => {
         // Create answer
         const answer = await peerConnection.createAnswer();
         await peerConnection.setLocalDescription(answer);
+        // console.log("answer", answer);
 
         // Send answer back
         socket.emit('call-answer', {
@@ -164,7 +168,8 @@ export const useVideoCallStore = create((set, get) => {
 
       try {
         await peerConnection.setRemoteDescription(
-          new RTCSessionDescription(answerData.answer)
+          new RTCSessionDescription(answerData.answer),
+        //   console.log("answer",answerData.answer)  //working
         );
       } catch (error) {
         console.log(error)
