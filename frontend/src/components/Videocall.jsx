@@ -21,29 +21,29 @@ const VideoCallModal = () => {
   const remoteVideoRef = useRef(null);
 
   // Update video streams
-//   useEffect(() => {
-//     if (localVideoRef.current && localStream) {
-//       localVideoRef.current.srcObject = localStream;
-//       console.log("localstream",localStream)
-//     }
-//     if (remoteVideoRef.current && remoteStream) {
-//         remoteVideoRef.current.srcObject = remoteStream;
-//         console.log("remotestream",remoteStream)
-//     }
-//   }, [localStream, remoteStream]);
-
-useEffect(() => {
-    const intervalId = setInterval(() => {
-      if (localStream && localVideoRef.current) {
-        localVideoRef.current.srcObject = localStream;
-        console.log("localstream updated", localStream);
-      }
-
-      if (remoteStream && remoteVideoRef.current) {
+  useEffect(() => {
+    if (localVideoRef.current && localStream) {
+      localVideoRef.current.srcObject = localStream;
+      console.log("localstream",localStream)
+    }
+    if (remoteVideoRef.current && remoteStream) {
         remoteVideoRef.current.srcObject = remoteStream;
-        console.log("remotestream updated", remoteStream);
-      }
-    }, 5000);  // Update every 5 seconds
+        console.log("remotestream",remoteStream)
+    }
+  }, [localStream, remoteStream]);
+
+// useEffect(() => {
+//     const intervalId = setInterval(() => {
+//       if (localStream && localVideoRef.current) {
+//         localVideoRef.current.srcObject = localStream;
+//         console.log("localstream updated", localStream);
+//       }
+
+//       if (remoteStream && remoteVideoRef.current) {
+//         remoteVideoRef.current.srcObject = remoteStream;
+//         console.log("remotestream updated", remoteStream);
+//       }
+//     }, 2000);  // Update every 5 seconds
 
     // Clean up the interval when the component unmounts
     return () => clearInterval(intervalId);
