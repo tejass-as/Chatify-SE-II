@@ -35,10 +35,10 @@ const VideoCallModal = () => {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white p-6 rounded-lg shadow-xl text-center">
-          <h2 className="text-xl mb-4">Incoming Call from {incomingCall}</h2>
+          <h2 className="text-xl mb-4">Incoming Call from {incomingCall.from}</h2>
           <div className="flex justify-center space-x-4">
             <button 
-              onClick={() => acceptCall({ from: incomingCall, offer: null })}
+              onClick={() => acceptCall({ from: incomingCall.from, offer: incomingCall.offer })}
               className="bg-green-500 text-white p-2 rounded flex items-center"
             >
               <Phone className="mr-2" /> Accept

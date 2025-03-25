@@ -54,7 +54,7 @@ export const useVideoCallStore = create((set, get) => {
       // Get local media stream
       try {
         const localStream = await navigator.mediaDevices.getUserMedia({ 
-          video: true, 
+        //   video: true, 
           audio: true 
         });
         
@@ -90,6 +90,8 @@ export const useVideoCallStore = create((set, get) => {
       try {
         // Create offer
         const offer = await peerConnection.createOffer();
+        if(!offer)
+            console.log("Offer not created");
         await peerConnection.setLocalDescription(offer);
 
         // Send offer to the other user
@@ -108,7 +110,7 @@ export const useVideoCallStore = create((set, get) => {
     // Handle incoming call
     handleIncomingCall: (callData) => {
       set({ 
-        incomingCall: callData.from,
+        incomingCall: callData,
         currentCall: null
       });
       toast.success(`Incoming call from ${callData.from}`);
@@ -124,13 +126,17 @@ export const useVideoCallStore = create((set, get) => {
 
       const peerConnection = await get().initializePeerConnection(callData.from);
       if (!peerConnection) return;
-
+      console.log("1/")
+      
+      
       try {
-        // Set remote description
-        await peerConnection.setRemoteDescription(
-          new RTCSessionDescription(callData.offer)
-        );
-
+          // Set remote description
+          console.log('Accepting call with offer:', callData.offer);
+          await peerConnection.setRemoteDescription(
+              new RTCSessionDescription(callData.offer)
+            );
+            console.log("2/")
+            
         // Create answer
         const answer = await peerConnection.createAnswer();
         await peerConnection.setLocalDescription(answer);
@@ -147,6 +153,7 @@ export const useVideoCallStore = create((set, get) => {
         });
       } catch (error) {
         toast.error('Failed to accept call', error);
+        console.log('Failed to accept call', error)
       }
     },
 
@@ -160,7 +167,8 @@ export const useVideoCallStore = create((set, get) => {
           new RTCSessionDescription(answerData.answer)
         );
       } catch (error) {
-        toast.error('Failed to handle call answer',  error);
+        console.log(error)
+        toast.error('Failed to handle call answer');
       }
     },
 

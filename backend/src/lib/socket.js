@@ -61,7 +61,7 @@ io.on("connection", (socket) => {
         offer: data.offer,
       });
       
-      console.log(`Call initiated from ${userId}`);
+      console.log(`Call initiated from ${userId} with offer ${data.offer}`);
     } catch (error) {
       console.error('Error in start-call:', error);
       socket.emit('call-error', { message: error.message });
