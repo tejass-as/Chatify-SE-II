@@ -216,7 +216,7 @@ export const useVideoCallStore = create((set, get) => {
     toggleVideo: () => {
       const { localStream } = get();
       if (!localStream) return;
-
+        
       const videoTracks = localStream.getVideoTracks();
       videoTracks.forEach(track => {
         track.enabled = !track.enabled;
