@@ -26,6 +26,7 @@ const VideoCallModal = () => {
       localVideoRef.current.srcObject = localStream;
     }
     if (remoteVideoRef.current && remoteStream) {
+        console.log('Setting remote stream:', remoteStream);
       remoteVideoRef.current.srcObject = remoteStream;
     }
   }, [localStream, remoteStream]);
