@@ -52,19 +52,26 @@ export const useVideoCallStore = create((set, get) => {
         console.log("Full remote stream:", event.streams[0]);
         set({ remoteStream: event.streams[0] });
         // console.log("getting remote stream", get().remoteStream); working
+        if (event.streams.length > 0) {
+            set({ remoteStream: event.streams[0] });
+            console.log("✅ [Callee] remoteStream SET!", event.streams[0]);
+          } else {
+            console.log("❌ [Callee] No remote stream received!");
+          }
       };
 
       // Get local media stream
       try {
         const localStream = await navigator.mediaDevices.getUserMedia({ 
-          video: true, 
+        //   video: true, 
           audio: true 
         });
 
         // Add local stream tracks to peer connection
         localStream.getTracks().forEach(track => {
-          peerConnection.addTrack(track, localStream);
-        });
+            // console.log("🎥 Adding local track:", track); working
+            peerConnection.addTrack(track, localStream);
+          });
 
         set({ 
           peerConnection, 
