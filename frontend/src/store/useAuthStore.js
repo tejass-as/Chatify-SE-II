@@ -67,6 +67,10 @@ export const useAuthStore = create((set, get) => ({
       useVideoCallStore.getState().endCall();
     });
 
+    socket.on('call-ended', () => {
+      useVideoCallStore.getState().endCall();
+    });
+
     socket.on('call-rejected', () => {
       toast.error('Call was rejected');
       useVideoCallStore.getState().endCall();
