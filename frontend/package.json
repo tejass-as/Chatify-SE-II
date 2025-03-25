@@ -19,6 +19,7 @@
     "react-router-dom": "^7.2.0",
     "socket.io-client": "^4.8.1",
     "tailwindcss": "^4.0.10",
+    "webrtc-adapter": "^9.0.1",
     "zustand": "^5.0.3"
   },
   "devDependencies": {

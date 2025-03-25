@@ -3,10 +3,13 @@ import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
 import { generateToken } from "../lib/utils.js";
+import dotenv from "dotenv"
+
 
 // Create a temporary store for OTPs (for development)
 // In production, consider using Redis or a database model
 const otpStore = {};
+dotenv.config()
 
 // Nodemailer Setup
 let transporter;
@@ -31,8 +34,8 @@ export const initializeEmailService = async () => {
         transporter = nodemailer.createTransport({
             service: "gmail",
             auth: {
-                user: "tejassonawane1110@gmail.com",
-                pass: "pzopafelewvjedma",
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS,
             }
         });
     }
