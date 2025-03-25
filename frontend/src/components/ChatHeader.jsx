@@ -38,7 +38,7 @@ const ChatHeader = () => {
         </div>
 
         {/* Close button */}
-        <button onClick={() => (isShowingGroups ? setSelectedGroup(null) : setSelectedUser(null))}>
+        <button className="cursor-pointer" onClick={() => (isShowingGroups ? setSelectedGroup(null) : setSelectedUser(null))}>
           <X />
         </button>
       </div>
