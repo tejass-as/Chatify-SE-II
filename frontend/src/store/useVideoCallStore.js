@@ -63,7 +63,7 @@ export const useVideoCallStore = create((set, get) => {
       // Get local media stream
       try {
         const localStream = await navigator.mediaDevices.getUserMedia({ 
-        //   video: true, 
+          video: true, 
           audio: true 
         });
 
