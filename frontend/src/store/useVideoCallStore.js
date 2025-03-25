@@ -253,7 +253,7 @@ export const useVideoCallStore = create((set, get) => {
         peerConnection: null
       });
 
-      toast.success('Call ended');
+    //   toast.success('Call ended');
     },
 
     // Reject incoming call
@@ -261,7 +261,7 @@ export const useVideoCallStore = create((set, get) => {
       const { socket, incomingCall } = get();
       
       if (socket && incomingCall) {
-        socket.emit('reject-call', { to: incomingCall });
+        socket.emit('reject-call', { to: incomingCall.from });
         
         set({ incomingCall: null });
         toast.error('Call rejected');
