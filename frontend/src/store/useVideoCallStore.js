@@ -67,6 +67,7 @@ export const useVideoCallStore = create((set, get) => {
           audio: true 
         });
 
+
         // Add local stream tracks to peer connection
         localStream.getTracks().forEach(track => {
             // console.log("🎥 Adding local track:", track); working
