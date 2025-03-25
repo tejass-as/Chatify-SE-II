@@ -30,7 +30,7 @@ const VideoCallModal = () => {
         remoteVideoRef.current.srcObject = remoteStream;
         console.log("remotestream",remoteStream)
     }
-  }, [localStream, remoteStream]);
+  }, [localStream, remoteStream, toggleVideo]);
 
   // Incoming call UI
   if (incomingCall) {
