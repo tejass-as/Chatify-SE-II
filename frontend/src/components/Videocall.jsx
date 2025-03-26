@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useVideoCallStore } from '../store/useVideoCallStore';
 import { Phone, PhoneOff, Mic, MicOff, Video, VideoOff } from 'lucide-react';
+import { useChatStore } from '../store/useChatStore';
 
 const VideoCallModal = () => {
   const {
@@ -16,6 +17,8 @@ const VideoCallModal = () => {
     toggleMicrophone,
     toggleVideo
   } = useVideoCallStore();
+
+  const {selectedUser} = useChatStore();
 
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
@@ -40,7 +43,7 @@ const VideoCallModal = () => {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white p-6 rounded-lg shadow-xl text-center">
-          <h2 className="text-xl mb-4">Incoming Call from {incomingCall.from}</h2>
+          <h2 className="text-xl mb-4">Incoming Call from {selectedUser.fullname}</h2>
           <div className="flex justify-center space-x-4">
             <button 
               onClick={() => acceptCall({ from: incomingCall.from, offer: incomingCall.offer })}
