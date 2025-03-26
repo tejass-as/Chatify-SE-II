@@ -3,9 +3,22 @@ import { useChatStore } from "../store/useChatStore";
 import Sidebar from "../components/Sidebar";
 import NoChatSelected from "../components/NoChatSelected";
 import ChatContainer from "../components/ChatContainer";
+import { useEffect } from "react";
+import { useAuthStore } from "../store/useAuthStore";
+
+
 
 const HomePage = () => {
   const { selectedUser, isShowingGroups, selectedGroup } = useChatStore();
+  const { authUser } = useAuthStore();
+
+    useEffect(() => {
+        if(authUser) {
+            const initializeSocket = useAuthStore.getState().initializeSocket;
+            const authUser = useAuthStore.getState().authUser;
+            initializeSocket(authUser._id);
+        }
+    }, [authUser])
 
   return (
     <div className="h-screen bg-base-200">

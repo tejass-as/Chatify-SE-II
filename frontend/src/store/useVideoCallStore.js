@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import toast from 'react-hot-toast';
+import { useChatStore } from './useChatStore';
 
 export const useVideoCallStore = create((set, get) => {
   return {
@@ -48,7 +49,8 @@ export const useVideoCallStore = create((set, get) => {
 
       // Handle remote stream
       peerConnection.ontrack = (event) => {
-        console.log("Received remote track:", event.track);
+        console.log("Received remote track kind : ", event.track.kind);
+        console.log("Received remote track : ", event.track);
         console.log("Full remote stream:", event.streams[0]);
         set({ remoteStream: event.streams[0] });
         // console.log("getting remote stream", get().remoteStream); working
@@ -124,7 +126,7 @@ export const useVideoCallStore = create((set, get) => {
         incomingCall: callData,
         currentCall: null
       });
-      toast.success(`Incoming call from ${callData.from}`);
+      toast.success(`Incoming call from ${useChatStore.getState().selectedUser.fullname}`);
     },
 
     // Accept incoming call
