@@ -29,6 +29,8 @@ const VideoCallModal = () => {
     }
     if (remoteVideoRef.current && remoteStream) {
         remoteVideoRef.current.srcObject = remoteStream;
+        remoteVideoRef.current.muted = false;
+        remoteVideoRef.current.volume = 1;
         console.log("remotestream",remoteStream)
     }
   }, [localStream, remoteStream, temp]);
