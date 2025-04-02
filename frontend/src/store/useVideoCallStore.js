@@ -126,7 +126,7 @@ export const useVideoCallStore = create((set, get) => {
         incomingCall: callData,
         currentCall: null
       });
-      toast.success(`Incoming call from ${useChatStore.getState().callData.from}`);
+      toast.success(`Incoming call from ${callData.from}`);
     },
 
     // Accept incoming call
