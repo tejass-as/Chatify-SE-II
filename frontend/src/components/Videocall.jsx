@@ -38,6 +38,10 @@ const VideoCallModal = () => {
     }
   }, [localStream, remoteStream, temp]);
 
+  useEffect(() => {
+    console.log("Hi");
+  }, [incomingCall]);
+
   // Incoming call UI
   if (incomingCall) {
     return (
