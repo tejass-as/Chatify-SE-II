@@ -18,7 +18,7 @@ const MessageInput = () => {
   } = useChatStore();
 
   // Cloudinary configuration
-  const CLOUD_NAME = "dwlgibweu"; 
+  const CLOUD_NAME = "dwlgibwe"; 
   const UPLOAD_PRESET = "chat_app"; 
 
   const handleFileChange = (e) => {
