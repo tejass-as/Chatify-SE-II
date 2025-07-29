@@ -4,7 +4,7 @@ This is a real-time chat application where users can chat with each other, send 
 
 ## 🔗 Deployed Website
 
-👉 [Visit the live app](chatify-se-ii.onrender.com)
+👉 [Visit the live app](chatify-se-ii.onrender.com/)
 
 ## Features
 
